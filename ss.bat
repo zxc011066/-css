@@ -1,43 +1,12 @@
 @echo off
-chcp 65001 >nul
-title CS2 Auto-Config & Launch
+:: Нам не нужно качать файл, мы передадим настройки прямо в строке запуска
+set "SETTINGS=+setting.cpu_level 1 +setting.gpu_mem_level 1 +setting.gpu_level 1 +setting.model_detail 1 +setting.msaa_samples 4 +fps_max 0 +con_enable 1"
 
-:: --- НАСТРОЙКИ ---
-:: Вставь сюда свою прямую ссылку (Raw) из GitHub:
-set "URL_CFG=https://raw.githubusercontent.com/zxc011066/-css/refs/heads/main/autoexec.cfg"
+echo [*] Запускаю игру с принудительными средними настройками...
 
-:: Пути к игре и ренталу (проверь диск, обычно F: в клубах)
-set "GAME_CFG_DIR=F:\SteamLibrary\steamapps\common\Counter-Strike Global Offensive\game\csgo\cfg"
-set "RENTAL_EXE=C:\RentalGames\RentalGames.exe"
+:: Запускаем рентал и прокидываем настройки через аргумент -gameparam
+:: В некоторых ренталах это работает через -args или просто добавление команд в конце
+start "" "C:\RentalGames\RentalGames.exe" -autostart -idgame 730 -args "%SETTINGS%"
 
-echo [*] Старт подготовки...
-
-:: 1. Проверка папки (создаем, если её нет)
-if not exist "%GAME_CFG_DIR%" (
-    echo [!] Папка конфигов не найдена, пробую создать...
-    mkdir "%GAME_CFG_DIR%" 2>nul
-)
-
-:: 2. Скачивание конфига (заменяет существующий)
-echo [*] Скачиваю конфиг из GitHub: %URL_CFG%
-curl -L -s -o "%GAME_CFG_DIR%\autoexec.cfg" "%URL_CFG%"
-
-if %errorlevel% equ 0 (
-    echo [+] Конфиг успешно обновлен в %GAME_CFG_DIR%
-) else (
-    echo [!] Ошибка скачивания! Проверь интернет или ссылку.
-    pause
-    exit /b
-)
-
-:: 3. Запуск игры через Rental
-echo [*] Запускаю Rental (CS2)...
-start "" "%RENTAL_EXE%" -autostart -noselect -asynchron_check -idgame 730
-
-:: 4. Костыль для окна Steam Cloud
-echo [*] Жду 12 секунд для пробития окна Cloud...
 timeout /t 12 /nobreak >nul
-powershell -command "$wshell = New-Object -ComObject WScript.Shell; $wshell.SendKeys(' ')"
-
-echo [+] Готово! Игра должна подхватить средние настройки.
-pause
+powershell -command "$ws = New-Object -ComObject WScript.Shell; $ws.SendKeys(' ')"
